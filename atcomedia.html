@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Anatolian Technologies CO Media // Admin Dashboard</title>
+    <style>
+        /* --- 2007 FRUTIGER AERO & AQUA CORE --- */
+        body {
+            background: #2d3436 url('https://www.transparenttextures.com/patterns/cubes.png');
+            font-family: "Lucida Grande", Tahoma, sans-serif;
+            margin: 0; padding: 0; color: #333;
+        }
+
+        /* Üst Navigasyon */
+        .top-nav {
+            background: linear-gradient(to bottom, #444, #000);
+            padding: 5px 10%; display: flex; gap: 5px;
+            border-bottom: 2px solid #00a3ef;
+        }
+        .nav-tab {
+            padding: 8px 15px; color: #ccc; text-decoration: none; font-size: 11px;
+            font-weight: bold; border-radius: 5px 5px 0 0; background: #222;
+        }
+        .nav-tab.active { background: #fff; color: #000; }
+
+        header {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px);
+            padding: 15px 10%; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .brand { display: flex; align-items: center; color: white; text-decoration: none; }
+        .globe {
+            width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, #5fbff9, #0052ad);
+            border-radius: 50%; border: 2px solid #fff; margin-right: 15px; position: relative;
+            box-shadow: 0 0 20px #00a3ef;
+        }
+
+        /* Layout */
+        .main-grid { display: grid; grid-template-columns: 200px 1fr 250px; gap: 20px; padding: 20px 5%; }
+
+        /* Paneller */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85); border-radius: 15px; padding: 15px;
+            border: 1px solid #fff; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+        .panel-title { font-size: 12px; font-weight: bold; color: #0052ad; border-bottom: 1px solid #ccc; margin-bottom: 10px; padding-bottom: 5px; text-transform: uppercase; }
+
+        /* Media Player */
+        .video-box { width: 100%; background: #000; aspect-ratio: 16/9; border-radius: 10px; border: 4px solid #fff; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        video { width: 100%; height: 100%; display: none; }
+
+        /* Admin Özel Alanı */
+        #adminPanel {
+            background: linear-gradient(135deg, #1e3799, #0984e3);
+            color: white; border: 2px solid #fff; display: none;
+        }
+        .admin-badge { background: #ff4757; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+        /* Butonlar */
+        .btn-aqua {
+            background: linear-gradient(180deg, #fff 0%, #00a3ef 50%, #0076ad 100%);
+            border: 1px solid #fff; color: white; padding: 8px 20px; border-radius: 20px;
+            font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); text-shadow: 0 1px 2px #000;
+        }
+        .btn-aqua:hover { filter: brightness(1.2); }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; align-items:center; justify-content:center; z-index:1000; }
+        .modal { background:#f0f0f0; width:350px; border-radius:15px; border:5px solid #00a3ef; padding:20px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border-radius: 8px; border: 1px solid #ccc; }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="top-nav">
+    <a href="#" class="nav-tab active">Portal</a>
+    <a href="#" class="nav-tab">Network</a>
+    <a href="#" class="nav-tab">Archives</a>
+</div>
+
+<header>
+    <a href="#" class="brand">
+        <div class="globe"></div>
+        <div style="font-size: 22px;">Anatolian Tech <span style="color:#00a3ef; font-weight: bold;">CO Media</span></div>
+    </a>
+    <div id="authSection">
+        <button class="btn-aqua" onclick="showModal()">GİRİŞ / KAYIT</button>
+    </div>
+    <div id="userSection" class="hidden" style="color:white; font-size:13px;">
+        <span id="welcomeTxt"></span> <span id="adminTag" class="admin-badge hidden">ADMIN</span>
+        <button class="btn-aqua" style="margin-left:10px; background:#555;" onclick="logout()">ÇIKIŞ</button>
+    </div>
+</header>
+
+<div class="main-grid">
+    <!-- Sol Panel -->
+    <aside class="glass-panel">
+        <div class="panel-title">Hizmetler</div>
+        <div style="font-size:12px; line-height:2;">
+            • Canlı Yayınlar<br>
+            • Veri Merkezi<br>
+            • Tech Haberleri<br>
+            • Aqua Net Forum
+        </div>
+    </aside>
+
+    <!-- Orta Panel -->
+    <main>
+        <div class="glass-panel" style="margin-bottom:20px;">
+            <div class="video-box" id="player">
+                <div id="msg" style="color:white; text-align:center;">▶ İzlemek için giriş yapın veya video yükleyin.</div>
+                <video id="v" controls></video>
+            </div>
+            <div style="margin-top:15px; display:flex; justify-content:space-between; align-items:center;">
+                <h3 id="vTitle" style="margin:0;">Media Station v5.0</h3>
+                <button class="btn-aqua" style="font-size:10px" onclick="triggerUpload()">DOSYA YÜKLE</button>
+                <input type="file" id="fIn" class="hidden" onchange="loadMedia(this)">
+            </div>
+        </div>
+
+        <!-- Sadece Adminlerin Görebildiği Panel -->
+        <div id="adminPanel" class="glass-panel">
+            <div class="panel-title" style="color:white; border-color:rgba(255,255,255,0.3)">ADMİN KONTROL MERKEZİ</div>
+            <p style="font-size:11px;">Hoş geldin Bahadır. Anatolian sunucularına tam erişim sağlandı.</p>
+            <div style="display:flex; gap:10px;">
+                <button class="btn-aqua" style="background:#2ecc71; border:none;" onclick="alert('Sistem Logları Temizlendi')">Sistem Logları</button>
+                <button class="btn-aqua" style="background:#e67e22; border:none;" onclick="alert('Kullanıcı Veritabanı Yükleniyor...')">Üyeleri Yönet</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Sağ Panel (Widgetlar) -->
+    <aside style="display:flex; flex-direction:column; gap:20px;">
+        <div class="glass-panel" style="background:rgba(0,0,0,0.7); color:white; border:1px solid #555;">
+            <div class="panel-title" style="color:#82d011;">SİSTEM DURUMU</div>
+            <div style="font-size:11px;">
+                CPU: %14 (Stable)<br>
+                Uptime: 247 Gün<br>
+                Bağlantı: <span style="color:#82d011">Secure SSL</span>
+            </div>
+        </div>
+        <div class="glass-panel">
+            <div class="panel-title">AKTİF KULLANICILAR</div>
+            <p style="font-size:11px;">1,294 Kişi Bağlı</p>
+        </div>
+    </aside>
+</div>
+
+<!-- Giriş Modalı -->
+<div class="modal-overlay" id="mOverlay">
+    <div class="modal">
+        <h2 style="margin-top:0; color:#00a3ef;">Portal Girişi</h2>
+        <input type="text" id="inName" placeholder="Adınız">
+        <input type="email" id="inEmail" placeholder="E-posta Adresiniz">
+        <button class="btn-aqua" style="width:100%" onclick="login()">Giriş Yap / Kaydol</button>
+        <p style="font-size:10px; color:#666; margin-top:10px;">Admin erişimi için bahadirvardar@gmail.com kullanın.</p>
+    </div>
+</div>
+
+<script>
+    // SİSTEM AYARLARI
+    const ADMIN_EMAIL = "bahadirvardar@gmail.com";
+
+    // Oturum Kontrolü
+    window.onload = () => {
+        const session = localStorage.getItem('userSession');
+        if(session) checkAccess(JSON.parse(session));
+    };
+
+    function showModal() { document.getElementById('mOverlay').style.display='flex'; }
+
+    function login() {
+        const name = document.getElementById('inName').value;
+        const email = document.getElementById('inEmail').value;
+
+        if(!name || !email) { alert("Lütfen alanları doldurun!"); return; }
+
+        const user = { name: name, email: email };
+        localStorage.setItem('userSession', JSON.stringify(user));
+        checkAccess(user);
+        document.getElementById('mOverlay').style.display='none';
+    }
+
+    function checkAccess(user) {
+        document.getElementById('authSection').classList.add('hidden');
+        document.getElementById('userSection').classList.remove('hidden');
+        document.getElementById('welcomeTxt').innerText = "Merhaba, " + user.name;
+
+        // Admin Kontrolü
+        if(user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('adminTag').classList.remove('hidden');
+            console.log("Admin yetkileri aktif edildi.");
+        } else {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('adminTag').classList.add('hidden');
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('userSession');
+        location.reload();
+    }
+
+    // Medya İşlemleri
+    function triggerUpload() { document.getElementById('fIn').click(); }
+    function loadMedia(input) {
+        const file = input.files[0];
+        if(file) {
+            const v = document.getElementById('v');
+            v.src = URL.createObjectURL(file);
+            v.style.display = 'block';
+            document.getElementById('msg').style.display = 'none';
+            document.getElementById('vTitle').innerText = file.name;
+            v.play();
+        }
+    }
+</script>
+
+</body>
+</html>
